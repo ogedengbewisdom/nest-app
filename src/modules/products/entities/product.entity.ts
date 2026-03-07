@@ -8,3 +8,12 @@ export class Product {
     createdAt: string;
     updatedAt: string;
 }
+
+export interface ApiResponse<T> {
+    statusCode: number;
+    success: boolean;
+    status: string;
+    message: string;
+    data: T;
+    timestamp: string;
+}

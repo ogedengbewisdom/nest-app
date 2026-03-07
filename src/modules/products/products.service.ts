@@ -9,11 +9,17 @@ export class ProductsService {
   private products: Product[] = [];
   private autoIncrementId = 1;
 
+  // private random = Math.floor(Math.random()  * 100) + 1;
+
   findAll() {
 
     return this.products;
 
   }
+
+  // findRandom() {
+  //   return this.random;
+  // }
 
   findOne(id: number) {
 
@@ -28,11 +34,11 @@ export class ProductsService {
     return product;
   }
 
-  create(createProductDto: CreateProductDto) {
-    
+  create(createProductDto: CreateProductDto, userId: number) {
     const newProduct = {
       id: this.autoIncrementId++,
       ...createProductDto,
+      userId: userId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -64,3 +70,6 @@ export class ProductsService {
 
   }
 }
+
+
+// export const productService = new ProductsService();

@@ -1,24 +1,35 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, Header, Request } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { DeleteProductDto } from './dto/delete-product.dto';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
+  // @Header('X-custom-header', 'Wisdom welcome to NestJS!')
   @HttpCode(HttpStatus.OK)
-  findAll() {
+  findAll(){
     const products =  this.productsService.findAll();
 
     return {
-      statusCode: HttpStatus.OK,
-      success: true,
       message: 'Products fetched successfully',
       data: products,
     };
   }
+
+  // @Get('random')
+  // @HttpCode(HttpStatus.OK)
+  //   findRandom() {
+  //   // const random = new ProductsService();
+  //   // const randomProduct = productService.findRandom();
+  //   return {
+  //     message: 'Random product fetched successfully',
+  //     data: this.productsService.findRandom(),
+  //   };
+  // }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
@@ -27,8 +38,6 @@ export class ProductsController {
     const product = this.productsService.findOne(productId);
 
     return {
-      statusCode: HttpStatus.OK,
-      success: true,
       message: 'Product fetched successfully',
       data: product,
     };
@@ -36,12 +45,12 @@ export class ProductsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createProductDto: CreateProductDto) {
-    const newProduct = this.productsService.create(createProductDto);
+  create(@Request() req,@Body() createProductDto: CreateProductDto) {
+
+    const userId = req.user.id
+    const newProduct = this.productsService.create(createProductDto, userId);
 
     return {
-      statusCode: HttpStatus.CREATED,
-      success: true,
       message: 'Product created successfully',
       data: newProduct,
     };
@@ -50,25 +59,22 @@ export class ProductsController {
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
+  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto){
     const updatedProduct = this.productsService.update(+id, updateProductDto);
 
     return {
-      statusCode: HttpStatus.OK,
-      success: true,
       message: 'Product updated successfully',
-      data: updatedProduct,
+      data: updatedProduct
     };
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  remove(@Param('id') id: string) {
-    const removedProduct = this.productsService.remove(+id);
+  remove(@Param() param: DeleteProductDto){
+    const {id} = param
+    const removedProduct = this.productsService.remove(id);
 
     return {
-      statusCode: HttpStatus.OK,
-      success: true,
       message: 'Product removed successfully',
       data: removedProduct,
     };
