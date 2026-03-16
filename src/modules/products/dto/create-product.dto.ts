@@ -1,10 +1,11 @@
-import { IsBoolean, IsEnum, IsInt, IsNumber, IsPositive, IsString, Min, MinLength } from 'class-validator';
+import { IsBoolean, IsEnum, IsInt, IsNotEmpty, IsNumber, IsPositive, IsString, Min, MinLength } from 'class-validator';
 import { ProductCategory } from '../enums/product-category.enum';
 
 
 export class CreateProductDto {
 
   @IsString()
+  @IsNotEmpty()
   @MinLength(4)
   name: string;
 
@@ -14,6 +15,7 @@ export class CreateProductDto {
   price: number;
 
   @IsString()
+  @IsNotEmpty()
   @MinLength(20)
   description: string;
 

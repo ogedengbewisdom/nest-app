@@ -1,18 +1,35 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, Header, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  Request,
+  UsePipes,
+  ValidationPipe,
+  ParseIntPipe,
+  NotFoundException,
+} from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { DeleteProductDto } from './dto/delete-product.dto';
+import { Public } from '../auth/decorator/public.decorator';
 
 @Controller('products')
+@UsePipes(new ValidationPipe())
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
+  @Public()
   @Get()
-  // @Header('X-custom-header', 'Wisdom welcome to NestJS!')
   @HttpCode(HttpStatus.OK)
-  findAll(){
-    const products =  this.productsService.findAll();
+  async findAll() {
+    const products = await this.productsService.findAll();
 
     return {
       message: 'Products fetched successfully',
@@ -20,22 +37,13 @@ export class ProductsController {
     };
   }
 
-  // @Get('random')
-  // @HttpCode(HttpStatus.OK)
-  //   findRandom() {
-  //   // const random = new ProductsService();
-  //   // const randomProduct = productService.findRandom();
-  //   return {
-  //     message: 'Random product fetched successfully',
-  //     data: this.productsService.findRandom(),
-  //   };
-  // }
-
+  @Public()
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  findOne(@Param('id') id: string) {
-    const productId = Number(id);
-    const product = this.productsService.findOne(productId);
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    const product = await this.productsService.findOne(id);
+
+    if (!product) throw new NotFoundException('Product not found');
 
     return {
       message: 'Product fetched successfully',
@@ -45,10 +53,12 @@ export class ProductsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Request() req,@Body() createProductDto: CreateProductDto) {
-
-    const userId = req.user.id
-    const newProduct = this.productsService.create(createProductDto, userId);
+  async create(@Request() req, @Body() createProductDto: CreateProductDto) {
+    const userId = req.user.sub;
+    const newProduct = await this.productsService.create(
+      createProductDto,
+      userId,
+    );
 
     return {
       message: 'Product created successfully',
@@ -56,23 +66,34 @@ export class ProductsController {
     };
   }
 
-
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto){
-    const updatedProduct = this.productsService.update(+id, updateProductDto);
+  async update(
+    @Request() req,
+    @Param() param: DeleteProductDto,
+    @Body() updateProductDto: UpdateProductDto,
+  ) {
+    const userId = req.user.sub;
+    const { id } = param;
+    console.log('id', id);
+    const updatedProduct = await this.productsService.update(
+      id,
+      updateProductDto,
+      userId,
+    );
 
     return {
       message: 'Product updated successfully',
-      data: updatedProduct
+      data: updatedProduct,
     };
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  remove(@Param() param: DeleteProductDto){
-    const {id} = param
-    const removedProduct = this.productsService.remove(id);
+  async remove(@Request() req, @Param() param: DeleteProductDto) {
+    const userId = req.user.sub;
+    const { id } = param;
+    const removedProduct = await this.productsService.remove(id, userId);
 
     return {
       message: 'Product removed successfully',

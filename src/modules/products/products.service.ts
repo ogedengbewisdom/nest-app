@@ -1,75 +1,125 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { Product } from './entities/product.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Products } from './entities/product.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ProductsService {
+  constructor(
+    @InjectRepository(Products)
+    private readonly productRepository: Repository<Products>,
+  ) {}
 
-  private products: Product[] = [];
-  private autoIncrementId = 1;
-
-  // private random = Math.floor(Math.random()  * 100) + 1;
-
-  findAll() {
-
-    return this.products;
-
+  async findAll() {
+    try {
+      const products = await this.productRepository.find({
+        relations: ['owner'],
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          description: true,
+          inStock: true,
+          category: true,
+          createdAt: true,
+          updatedAt: true,
+          owner: {
+            id: true,
+          },
+        },
+      });
+      return products;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error?.message || 'Failed to fetch products',
+      );
+    }
   }
 
   // findRandom() {
   //   return this.random;
   // }
 
-  findOne(id: number) {
-
-    const product = this.products.find((prd) => prd.id === id);
-
-    if (!product) {
-
-      throw new NotFoundException('Product not found');
-
+  async findOne(id: number) {
+    try {
+      const product = await this.productRepository.findOne({
+        where: { id },
+        relations: ['owner'],
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          description: true,
+          inStock: true,
+          category: true,
+          createdAt: true,
+          updatedAt: true,
+          owner: {
+            id: true,
+          },
+        },
+      });
+      return product;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error?.message || 'Failed to fetch product',
+      );
     }
-
-    return product;
   }
 
-  create(createProductDto: CreateProductDto, userId: number) {
-    const newProduct = {
-      id: this.autoIncrementId++,
-      ...createProductDto,
-      userId: userId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    this.products = [...this.products, newProduct]
-
-    return newProduct;
+  async create(createProductDto: CreateProductDto, userId: number) {
+    try {
+      const newProduct = this.productRepository.create({
+        ...createProductDto,
+        owner: { id: userId },
+      });
+      await this.productRepository.save(newProduct);
+      return newProduct;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error?.message || 'Failed to create product',
+      );
+    }
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-
-    const existingProduct = this.findOne(id);
-
-    const updatedProduct = {...existingProduct, ...updateProductDto, updatedAt: new Date().toISOString()}
-
-    this.products = this.products.map((prd) => prd.id === id ? updatedProduct : prd)
-
-    return updatedProduct;
-
+  async update(id: number, updateProductDto: UpdateProductDto, userId: number) {
+    const existingProduct = await this.findOne(id);
+    if (!existingProduct) throw new NotFoundException('Product not found');
+    if (existingProduct.owner.id !== userId)
+      throw new ForbiddenException(
+        'You are not authorized to update this product',
+      );
+    try {
+      await this.productRepository.update(id, updateProductDto);
+      return await this.findOne(id);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error?.message || 'Failed to update product',
+      );
+    }
   }
 
-  remove(id: number) {
-
-    const existingProduct = this.findOne(id);
-
-    this.products = this.products.filter((prd) => prd.id !== id);
-
-    return existingProduct
-
+  async remove(id: number, userId: number) {
+    const existingProduct = await this.findOne(id);
+    if (!existingProduct) throw new NotFoundException('Product not found');
+    if (existingProduct.owner.id !== userId)
+      throw new ForbiddenException(
+        'You are not authorized to delete this product',
+      );
+    try {
+      await this.productRepository.delete(id);
+      return existingProduct.id;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error?.message || 'Failed to delete product',
+      );
+    }
   }
 }
-
-
-// export const productService = new ProductsService();
