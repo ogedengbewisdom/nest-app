@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { map, Observable } from 'rxjs';
-import { ApiResponse } from 'src/modules/products/interface/product-interface';
+import { ApiResponse } from '../../modules/products/interface/product-interface';
 
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor {

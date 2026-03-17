@@ -1,4 +1,4 @@
-import { Users } from 'src/modules/users/entities/user.entity';
+import { Users } from '../../users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,

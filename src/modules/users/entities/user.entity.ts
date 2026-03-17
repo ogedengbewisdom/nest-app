@@ -1,5 +1,6 @@
 // import { Product } from 'src/modules/products/interface/product-interface';
-import { Products } from 'src/modules/products/entities/product.entity';
+// import { Products } from 'src/modules/products/entities/product.entity';
+import { Products } from '../../products/entities/product.entity';
 import {
   Column,
   CreateDateColumn,
