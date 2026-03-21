@@ -8,8 +8,10 @@ import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { Public } from './decorator/public.decorator';
+import { Throttle } from '@nestjs/throttler';
 
-@Controller('auth')
+// @Controller('auth')
+@Controller({ path: 'auth', version: '1' })
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -24,6 +26,7 @@ export class AuthController {
 
   @Public()
   @Post('login')
+  @Throttle({ default: { limit: 2, ttl: 60 * 1000 } })
   async login(@Body() loginDto: LoginDto) {
     const token = await this.authService.login(loginDto);
     return {

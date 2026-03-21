@@ -14,7 +14,8 @@ import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ParseIntPipe } from '../../common/pipes/parse-int/parse-int.pipe';
 
-@Controller('users')
+// @Controller('users')
+@Controller({ path: 'users', version: '1' })
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

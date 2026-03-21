@@ -20,7 +20,8 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { DeleteProductDto } from './dto/delete-product.dto';
 import { Public } from '../auth/decorator/public.decorator';
 
-@Controller('products')
+// @Controller('products')
+@Controller({ path: 'products', version: '1' })
 @UsePipes(new ValidationPipe())
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}

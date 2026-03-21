@@ -30,6 +30,7 @@ export class Products {
   category: ProductCategory;
 
   @ManyToOne(() => Users, (user) => user.products)
+  // @JoinColumn({ name: 'ownerId' })
   owner: Users;
 
   @CreateDateColumn()

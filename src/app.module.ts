@@ -7,6 +7,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 const devMode = process.env.NODE_ENV !== 'production';
 
@@ -16,6 +18,12 @@ const devMode = process.env.NODE_ENV !== 'production';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60 * 1000,
+        limit: 100,
+      },
+    ]),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({
@@ -26,7 +34,7 @@ const devMode = process.env.NODE_ENV !== 'production';
         password: config.get('DB_PASSWORD', '1234'),
         database: config.get('DB_NAME', 'product_api_db'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: devMode,
+        synchronize: false,
       }),
       inject: [ConfigService],
     }),
@@ -35,7 +43,13 @@ const devMode = process.env.NODE_ENV !== 'production';
     UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
