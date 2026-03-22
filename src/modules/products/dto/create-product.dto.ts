@@ -1,9 +1,23 @@
-import { IsBoolean, IsEnum, IsInt, IsNotEmpty, IsNumber, IsPositive, IsString, Min, MinLength } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+  IsUrl,
+  Max,
+  Min,
+  MinLength,
+  ValidateNested,
+} from 'class-validator';
 import { ProductCategory } from '../enums/product-category.enum';
-
+import { Type } from 'class-transformer';
+import { ProductPropertyDto } from './product-property.dto';
 
 export class CreateProductDto {
-
   @IsString()
   @IsNotEmpty()
   @MinLength(4)
@@ -18,6 +32,20 @@ export class CreateProductDto {
   @IsNotEmpty()
   @MinLength(20)
   description: string;
+
+  @IsUrl()
+  imageUrl: string;
+
+  @IsNumber()
+  @Min(0)
+  @Max(5)
+  rating: number;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductPropertyDto)
+  properties?: ProductPropertyDto[];
 
   @IsBoolean()
   inStock: boolean;

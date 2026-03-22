@@ -1,7 +1,6 @@
 import {
-  BadRequestException,
+  ConflictException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -18,53 +17,46 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
   async signup(signupDto: SignupDto) {
-    try {
-      const existingUser = await this.usersService.findOneByEmail(
-        signupDto.email,
-      );
+    const existingUser = await this.usersService.findOneByEmail(
+      signupDto.email,
+    );
 
-      if (existingUser) throw new BadRequestException('User already exists');
+    if (existingUser) throw new ConflictException('User already exists');
 
-      const hashedPassword = await bcrypt.hash(signupDto.password, 10);
+    const hashedPassword = await bcrypt.hash(signupDto.password, 10);
 
-      if (!hashedPassword)
-        throw new InternalServerErrorException('Failed to hash password');
+    const newUser = await this.usersService.create({
+      ...signupDto,
+      password: hashedPassword,
+    });
 
-      const newUser = await this.usersService.create({
-        ...signupDto,
-        password: hashedPassword,
-      });
-
-      return newUser;
-    } catch (error) {
-      throw new InternalServerErrorException(
-        error?.message || 'Failed to signup',
-      );
-    }
+    return newUser;
   }
 
   async login(loginDto: LoginDto) {
-    try {
-      const user = await this.usersService.findOneByEmail(loginDto.email);
+    const user = await this.usersService.findOneByEmail(loginDto.email);
 
-      if (!user) throw new NotFoundException('Invalid email or password');
+    if (!user) throw new NotFoundException('Invalid email or password');
 
-      const comparePassword = await bcrypt.compare(
-        loginDto.password,
-        user.password,
-      );
+    const comparePassword = await bcrypt.compare(
+      loginDto.password,
+      user.password,
+    );
 
-      if (!comparePassword)
-        throw new UnauthorizedException('Invalid email or password');
+    if (!comparePassword)
+      throw new UnauthorizedException('Invalid email or password');
 
-      const payload = { sub: user.id, email: user.email };
+    const payload = { sub: user.id, email: user.email };
 
-      const token = this.jwtService.sign(payload);
-      return token;
-    } catch (error) {
-      throw new InternalServerErrorException(
-        error?.message || 'Failed to login',
-      );
-    }
+    const token = this.jwtService.sign(payload);
+    return {
+      accessToken: token,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
+    };
   }
 }

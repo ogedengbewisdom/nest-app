@@ -26,7 +26,7 @@ export class AuthController {
 
   @Public()
   @Post('login')
-  @Throttle({ default: { limit: 2, ttl: 60 * 1000 } })
+  @Throttle({ default: { limit: 3, ttl: 60 * 1000 } })
   async login(@Body() loginDto: LoginDto) {
     const token = await this.authService.login(loginDto);
     return {

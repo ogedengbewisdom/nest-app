@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ProductCategory } from '../enums/product-category.enum';
+import { ProductProperty } from '../interface/product-interface';
 
 @Entity()
 export class Products {
@@ -32,6 +33,15 @@ export class Products {
   @ManyToOne(() => Users, (user) => user.products)
   // @JoinColumn({ name: 'ownerId' })
   owner: Users;
+
+  @Column({ type: 'float', default: 0 })
+  rating: number;
+
+  @Column({ default: '' })
+  imageUrl: string;
+
+  @Column({ type: 'jsonb', default: '[]' })
+  properties: ProductProperty[];
 
   @CreateDateColumn()
   createdAt: Date;

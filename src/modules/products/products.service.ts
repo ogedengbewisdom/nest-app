@@ -30,6 +30,9 @@ export class ProductsService {
           category: true,
           createdAt: true,
           updatedAt: true,
+          imageUrl: true,
+          rating: true,
+          properties: true,
           owner: {
             id: true,
           },
@@ -59,6 +62,9 @@ export class ProductsService {
           description: true,
           inStock: true,
           category: true,
+          imageUrl: true,
+          rating: true,
+          properties: true,
           createdAt: true,
           updatedAt: true,
           owner: {

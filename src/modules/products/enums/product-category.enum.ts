@@ -1,5 +1,7 @@
 export enum ProductCategory {
-    ELECTRONICS = 'electronics',
-    CLOTHING = 'clothing'
-  }
-  
+  ELECTRONICS = 'electronics',
+  CLOTHING = 'clothing',
+  JEWELLERY = 'jewellery',
+}
+
+

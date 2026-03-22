@@ -17,3 +17,9 @@ export interface ApiResponse<T> {
   data: T;
   timestamp: string;
 }
+
+
+export interface ProductProperty {
+  color: string;
+  weight: string;
+}
