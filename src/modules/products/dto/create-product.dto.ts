@@ -50,6 +50,8 @@ export class CreateProductDto {
   @IsBoolean()
   inStock: boolean;
 
-  @IsEnum(ProductCategory)
-  category: ProductCategory;
+  @IsNumber()
+  @IsNotEmpty()
+  @IsPositive()
+  category_id: number;
 }

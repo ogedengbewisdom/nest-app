@@ -9,11 +9,12 @@ import { ProductsService } from './products.service';
 import { ProductsController } from './products.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Products } from './entities/product.entity';
+import { CategoryModule } from '../category/category.module';
 // import { AuthMiddleware } from 'src/common/middleware/auth/auth.middleware';
 // import { APP_PIPE } from '@nestjs/core';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Products])],
+  imports: [TypeOrmModule.forFeature([Products]), CategoryModule],
   controllers: [ProductsController],
   providers: [
     // {provide:APP_PIPE, useClass: ValidationPipe},

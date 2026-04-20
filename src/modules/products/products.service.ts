@@ -9,25 +9,31 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Products } from './entities/product.entity';
 import { Repository } from 'typeorm';
+import { CategoryService } from '../category/category.service';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectRepository(Products)
     private readonly productRepository: Repository<Products>,
+    private readonly categoryService: CategoryService,
   ) {}
 
   async findAll() {
     try {
       const products = await this.productRepository.find({
-        relations: ['owner'],
+        relations: ['owner', 'category'],
         select: {
           id: true,
           name: true,
           price: true,
           description: true,
           inStock: true,
-          category: true,
+          category: {
+            id: true,
+            name: true,
+            description: true,
+          },
           createdAt: true,
           updatedAt: true,
           imageUrl: true,
@@ -54,14 +60,18 @@ export class ProductsService {
     try {
       const product = await this.productRepository.findOne({
         where: { id },
-        relations: ['owner'],
+        relations: ['owner', 'category'],
         select: {
           id: true,
           name: true,
           price: true,
           description: true,
           inStock: true,
-          category: true,
+          category: {
+            id: true,
+            name: true,
+            description: true,
+          },
           imageUrl: true,
           rating: true,
           properties: true,
@@ -81,10 +91,14 @@ export class ProductsService {
   }
 
   async create(createProductDto: CreateProductDto, userId: number) {
+    const category = await this.categoryService.findOne(
+      createProductDto.category_id,
+    );
     try {
       const newProduct = this.productRepository.create({
         ...createProductDto,
         owner: { id: userId },
+        category: category,
       });
       await this.productRepository.save(newProduct);
       return newProduct;
@@ -102,6 +116,18 @@ export class ProductsService {
       throw new ForbiddenException(
         'You are not authorized to update this product',
       );
+
+    if (updateProductDto.category_id) {
+      const category = await this.categoryService.findOne(
+        updateProductDto.category_id,
+      );
+
+      if (!category)
+        throw new NotFoundException(
+          `Category with id ${updateProductDto.category_id} not found`,
+        );
+    }
+
     try {
       await this.productRepository.update(id, updateProductDto);
       return await this.findOne(id);

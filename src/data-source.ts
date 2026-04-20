@@ -1,5 +1,8 @@
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
+import { Users } from './modules/users/entities/user.entity';
+import { Products } from './modules/products/entities/product.entity';
+import { Category } from './modules/category/entities/category.entity';
 dotenv.config();
 
 export default new DataSource({
@@ -9,7 +12,8 @@ export default new DataSource({
   username: process.env.DB_USERNAME ?? 'postgres',
   password: process.env.DB_PASSWORD ?? '1234',
   database: process.env.DB_NAME ?? 'product_api_db',
-  entities: ['src/**/*.entity.ts'],
-  migrations: ['src/migrations/*.ts'],
+  entities: [Users, Products, Category],
+  // migrations: ['src/migrations/*.{ts,js}'],
+  migrations: [__dirname + '/migrations/*{.ts,.js}'],
   synchronize: false,
 });

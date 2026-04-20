@@ -76,7 +76,7 @@ export class ProductsController {
   ) {
     const userId = req.user.sub;
     const { id } = param;
-    console.log('id', id);
+  
     const updatedProduct = await this.productsService.update(
       id,
       updateProductDto,

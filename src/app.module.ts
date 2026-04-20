@@ -9,8 +9,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-
-const devMode = process.env.NODE_ENV !== 'production';
+// import dataSource from './data-source';
+import dataSource from './data-source';
+import { CategoryModule } from './modules/category/category.module';
 
 @Module({
   imports: [
@@ -25,24 +26,16 @@ const devMode = process.env.NODE_ENV !== 'production';
       },
     ]),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get('DB_HOST', 'localhost'),
-        port: parseInt(config.get('DB_PORT', '5432'), 10),
-        username: config.get('DB_USERNAME', 'postgres'),
-        password: config.get('DB_PASSWORD', '1234'),
-        database: config.get('DB_NAME', 'product_api_db'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: false,
+      useFactory: () => ({
+        ...dataSource.options,
       }),
-      inject: [ConfigService],
     }),
     ProductsModule,
     AuthModule,
     UsersModule,
+    CategoryModule,
   ],
-  controllers: [AppController],
+  controllers: [],
   providers: [
     AppService,
     {

@@ -1,14 +1,16 @@
 import { Users } from '../../users/entities/user.entity';
 import {
+  Check,
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ProductCategory } from '../enums/product-category.enum';
 import { ProductProperty } from '../interface/product-interface';
+import { Category } from '../../category/entities/category.entity';
 
 @Entity()
 export class Products {
@@ -27,14 +29,22 @@ export class Products {
   @Column({ default: true })
   inStock: boolean;
 
-  @Column({ type: 'enum', enum: ProductCategory })
-  category: ProductCategory;
+  // @Column({ type: 'enum', enum: ProductCategory })
+  // category: ProductCategory;
+
+  @Column()
+  category_id: number;
 
   @ManyToOne(() => Users, (user) => user.products)
   // @JoinColumn({ name: 'ownerId' })
   owner: Users;
 
-  @Column({ type: 'float', default: 0 })
+  @ManyToOne(() => Category, (category) => category.products)
+  @JoinColumn({ name: 'category_id' })
+  category: Category;
+
+  @Column({ type: 'decimal', precision: 3, scale: 2, default: 0 })
+  @Check('rating_check', 'rating >= 0 AND rating <= 5')
   rating: number;
 
   @Column({ default: '' })
