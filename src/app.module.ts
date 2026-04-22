@@ -34,7 +34,7 @@ import { CategoryModule } from './modules/category/category.module';
     UsersModule,
     CategoryModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [
     AppService,
     {
